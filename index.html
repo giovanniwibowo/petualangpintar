@@ -128,13 +128,15 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--fb);backgroun
 .game-world{height:calc(100vh - 140px);position:relative;overflow:hidden;transition:background .5s ease;cursor:pointer}
 .world-track{position:absolute;bottom:80px;left:0;right:0;height:80px;overflow:visible}
 .world-ground{position:absolute;bottom:0;left:-5%;right:-5%;height:16px;background:linear-gradient(135deg,#FECA57,#FF9F43);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
-.checkpoint{position:absolute;bottom:12px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s;z-index:5}
-.checkpoint:hover{transform:scale(1.2) translateY(-4px)}
-.checkpoint.active{animation:cpPulse .8s ease-in-out infinite}
+.checkpoint{position:absolute;bottom:12px;display:flex;flex-direction:column;align-items:center;cursor:pointer;z-index:5;transform:translateX(-50%)}
+.checkpoint::before{content:'';position:absolute;inset:-16px -20px;z-index:1}
+.checkpoint-inner{display:flex;flex-direction:column;align-items:center;transition:transform .2s;pointer-events:none}
+.checkpoint:hover .checkpoint-inner{transform:scale(1.2) translateY(-4px)}
+.checkpoint.active .checkpoint-inner{animation:cpPulse .8s ease-in-out infinite}
 @keyframes cpPulse{0%,100%{transform:scale(1) translateY(-2px)}50%{transform:scale(1.15) translateY(-6px)}}
 .checkpoint.done .cp-flag,.checkpoint.done .cp-num{display:none}
 .cp-flag{font-size:28px;display:block}
-.cp-num{background:#fff;border:2px solid rgba(0,0,0,.1);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-top:2px;box-shadow:var(--s1)}
+.cp-num{background:#fff;border:2px solid rgba(0,0,0,.1);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;margin-top:2px;box-shadow:var(--s1)}
 .cp-done{font-size:24px}
 .player-char{position:absolute;bottom:calc(80px + 12px);transition:left .6s cubic-bezier(.4,0,.2,1);z-index:10;display:flex;flex-direction:column;align-items:center}
 .char-sprite{font-size:48px;display:block;transition:transform .1s}
@@ -620,16 +622,16 @@ function buildWorldTrack(count){
   for(let i=0;i<count;i++){
     const pct=8+(i/(count-1||1))*84,cp=document.createElement('div');
     cp.className='checkpoint';cp.id=`cp-${i}`;cp.style.left=pct+'%';
-    cp.innerHTML=`<div class="cp-flag">🚩</div><div class="cp-num">${i+1}</div>`;
+    cp.innerHTML=`<div class="checkpoint-inner"><div class="cp-flag">&#x1F6A9;</div><div class="cp-num">${i+1}</div></div>`;
     cp.onclick=()=>triggerCheckpoint(i);track.appendChild(cp);
   }
 }
 function positionCharacter(idx){
   const lv=S.currentLevel,count=lv.checkpoints;
-  const pct=idx<count?8+(idx/(count-1||1))*84:95;
-  const char=document.getElementById('player-char'),world=document.getElementById('game-world');
-  const targetX=(pct/100)*world.offsetWidth-30;
-  char.classList.add('walking');char.style.left=targetX+'px';
+  const pct=idx<count?8+(idx/(count-1||1))*84:97;
+  const char=document.getElementById('player-char');
+  char.classList.add('walking');
+  char.style.left='calc('+pct+'% - 24px)';
   document.getElementById('char-sprite').textContent=S.playerChar.emoji;
   setTimeout(()=>{char.classList.remove('walking');if(idx<count){const cp=document.getElementById(`cp-${idx}`);if(cp)cp.classList.add('active');}},600);
 }
@@ -701,7 +703,7 @@ function showFunFact(q,pts,correct){
 function closeFunFact(){
   document.getElementById('overlay-funfact').classList.add('hidden');
   const cp=document.getElementById(`cp-${S.currentCheckpoint}`);
-  if(cp){cp.classList.remove('active');cp.classList.add('done');cp.innerHTML='<div class="cp-done">✅</div>';}
+  if(cp){cp.classList.remove('active');cp.classList.add('done');cp.innerHTML='<div class="checkpoint-inner"><div class="cp-done">\u2705</div></div>';}
   S.currentCheckpoint++;updateProgress();
   if(S.currentCheckpoint>=S.currentLevel.checkpoints)setTimeout(showLevelComplete,300);
   else positionCharacter(S.currentCheckpoint);
