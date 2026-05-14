@@ -755,7 +755,9 @@ function showToast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.remove('hidden');t.classList.add('show');
   setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.classList.add('hidden'),300);},2500);
 }
+function closeAllOverlays(){document.querySelectorAll('.overlay').forEach(o=>o.classList.add('hidden'));clearInterval(S.timerInterval);}
 function showScreen(id){
+  closeAllOverlays();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   AudioEngine.playClick();
